@@ -1,47 +1,47 @@
-# include <iostream>
-# include <vector>
-# include <fstream>
-# include <string>
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <string>
 
-# include "MyQuicksort.hpp"
+#include "MyQuicksort_t984h395.hpp"
 
 using namespace std;
 
-void parseInstance(const std::string& line, std::vector<std::string> & res)
+void parseInstance(const std::string &line, std::vector<std::string> &res)
 {
-    int p = 0, q = 0;
-    while(q < line.size())
+  int p = 0, q = 0;
+  while (q < line.size())
+  {
+    if (line[q] == ',')
     {
-        if(line[q] ==',')
-        {
-            res.push_back(line.substr(p,q-p));
-            p=q+1;
-        }
-        q++;
+      res.push_back(line.substr(p, q - p));
+      p = q + 1;
     }
+    q++;
+  }
 }
 
-
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
   std::ifstream fin;
   std::vector<std::string> data;
-  fin.open(argv[1]);	    // open file
-  if (!fin.is_open())	    // fail to open
+  fin.open(argv[1]);  // open file
+  if (!fin.is_open()) // fail to open
   {
-      std::cout << "Cannot open the test instance file. Abort." << std::endl;
-      return 0;
+    std::cout << "Cannot open the test instance file. Abort." << std::endl;
+    return 0;
   }
   else
   {
     std::string line;
-    while(std::getline(fin, line))
+    while (std::getline(fin, line))
     {
-      parseInstance(line,data);
+      parseInstance(line, data);
     }
   }
   std::vector<int> data2;
-  for(auto x : data) data2.push_back(std::stoi(x));
+  for (auto x : data)
+    data2.push_back(std::stoi(x));
   PrintArray(data2);
   // sort INTEGER array in ascending order
   Quicksort(data2);
