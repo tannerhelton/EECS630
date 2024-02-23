@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <assert.h>
+#include <utility>
 
 const int BOUNDARY_SIZE = 10; // sort directly using insertion sort if the input size is smaller than BOUNRARY_SIZE
 
@@ -54,13 +55,21 @@ void InsertionSort(std::vector<Comparable> &a, int left, int right, bool reverse
   for (int i = left + 1; i <= right; ++i)
   {
     Comparable tmp = std::move(a[i]);
-    int j;
-
-    for (j = i; j > left && ((tmp < a[j - 1] && !reverse) || (tmp > a[j - 1] && reverse)); --j)
+    int j = i;
+    if (!reverse)
     {
-      a[j] = std::move(a[j - 1]);
+      for (; j > left && tmp < a[j - 1]; --j)
+      {
+        a[j] = std::move(a[j - 1]);
+      }
     }
-
+    else
+    {
+      for (; j > left && tmp > a[j - 1]; --j)
+      {
+        a[j] = std::move(a[j - 1]);
+      }
+    }
     a[j] = std::move(tmp);
   }
   // CODE ENDS
@@ -75,18 +84,12 @@ const size_t ArrayMedian3(std::vector<Comparable> &a, const size_t x, const size
 {
 
   // CODE BEGINS
-  if ((a[x] < a[y] && a[y] < a[z]) || (a[z] < a[y] && a[y] < a[x]))
-  {
-    return y;
-  }
-  else if ((a[y] < a[x] && a[x] < a[z]) || (a[z] < a[x] && a[x] < a[y]))
-  {
+  if ((a[x] < a[y]) ^ (a[x] < a[z]))
     return x;
-  }
+  else if ((a[y] < a[x]) ^ (a[y] < a[z]))
+    return y;
   else
-  {
     return z;
-  }
   // CODE ENDS
 }
 
@@ -100,44 +103,46 @@ void Quicksort(std::vector<Comparable> &a, int left, int right, bool reverse = f
   // CODE BEGINS
   if (left + BOUNDARY_SIZE <= right)
   {
-    // Find pivot index using ArrayMedian3 and swap it with the rightmost element
-    const size_t pivotIdx = ArrayMedian3(a, left, (left + right) / 2, right);
-    std::swap(a[pivotIdx], a[right]);
+    size_t pivotIndex = ArrayMedian3(a, left, (left + right) / 2, right);
+    std::swap(a[pivotIndex], a[right]); // Move pivot to end
+    Comparable pivot = a[right];
 
-    Comparable pivot = a[right]; // Set the pivot element
-
-    // Initialize for indexing
-    int i = left - 1;
-    int j = right;
-
-    while (true)
+    int i = left - 1, j = right;
+    for (;;)
     {
-      while ((a[++i] < pivot && !reverse) || (a[i] > pivot && reverse))
+      // Adjust comparison for ascending or descending order
+      if (!reverse)
       {
-      }
-
-      while ((pivot < a[--j] && !reverse) || (pivot > a[j] && reverse))
-      {
-      }
-
-      if (i < j)
-      {
-        std::swap(a[i], a[j]);
+        while (a[++i] < pivot)
+        {
+        }
+        while (pivot < a[--j])
+          if (j == left)
+            break;
       }
       else
       {
-        break;
+        while (a[++i] > pivot)
+        {
+        }
+        while (pivot > a[--j])
+          if (j == left)
+            break;
       }
+
+      if (i >= j)
+        break;
+      std::swap(a[i], a[j]);
     }
 
     std::swap(a[i], a[right]); // Restore pivot
 
-    Quicksort(a, left, i - 1, reverse);
-    Quicksort(a, i + 1, right, reverse);
+    Quicksort(a, left, i - 1, reverse);  // Sort small elements
+    Quicksort(a, i + 1, right, reverse); // Sort large elements
   }
   else
   {
-    // Use Insertion Sort for small subarrays
+    // Use insertion sort for small arrays
     InsertionSort(a, left, right, reverse);
   }
   // CODE ENDS
