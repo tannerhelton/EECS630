@@ -51,7 +51,18 @@ template <typename Comparable>
 void InsertionSort(std::vector<Comparable> &a, int left, int right, bool reverse = false)
 {
   // CODE BEGINS
+  for (int i = left + 1; i <= right; ++i)
+  {
+    Comparable tmp = std::move(a[i]);
+    int j;
 
+    for (j = i; j > left && ((tmp < a[j - 1] && !reverse) || (tmp > a[j - 1] && reverse)); --j)
+    {
+      a[j] = std::move(a[j - 1]);
+    }
+
+    a[j] = std::move(tmp);
+  }
   // CODE ENDS
 }
 
@@ -64,7 +75,18 @@ const size_t ArrayMedian3(std::vector<Comparable> &a, const size_t x, const size
 {
 
   // CODE BEGINS
-
+  if ((a[x] < a[y] && a[y] < a[z]) || (a[z] < a[y] && a[y] < a[x]))
+  {
+    return y;
+  }
+  else if ((a[y] < a[x] && a[x] < a[z]) || (a[z] < a[x] && a[x] < a[y]))
+  {
+    return x;
+  }
+  else
+  {
+    return z;
+  }
   // CODE ENDS
 }
 
@@ -76,7 +98,48 @@ template <typename Comparable>
 void Quicksort(std::vector<Comparable> &a, int left, int right, bool reverse = false)
 {
   // CODE BEGINS
+  if (left + BOUNDARY_SIZE <= right)
+  {
+    // Find pivot index using ArrayMedian3 and swap it with the rightmost element
+    const size_t pivotIdx = ArrayMedian3(a, left, (left + right) / 2, right);
+    std::swap(a[pivotIdx], a[right]);
 
+    Comparable pivot = a[right]; // Set the pivot element
+
+    // Initialize for indexing
+    int i = left - 1;
+    int j = right;
+
+    while (true)
+    {
+      while ((a[++i] < pivot && !reverse) || (a[i] > pivot && reverse))
+      {
+      }
+
+      while ((pivot < a[--j] && !reverse) || (pivot > a[j] && reverse))
+      {
+      }
+
+      if (i < j)
+      {
+        std::swap(a[i], a[j]);
+      }
+      else
+      {
+        break;
+      }
+    }
+
+    std::swap(a[i], a[right]); // Restore pivot
+
+    Quicksort(a, left, i - 1, reverse);
+    Quicksort(a, i + 1, right, reverse);
+  }
+  else
+  {
+    // Use Insertion Sort for small subarrays
+    InsertionSort(a, left, right, reverse);
+  }
   // CODE ENDS
 }
 
