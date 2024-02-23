@@ -104,13 +104,12 @@ void Quicksort(std::vector<Comparable> &a, int left, int right, bool reverse = f
   if (left + BOUNDARY_SIZE <= right)
   {
     size_t pivotIndex = ArrayMedian3(a, left, (left + right) / 2, right);
-    std::swap(a[pivotIndex], a[right]); // Move pivot to end
+    std::swap(a[pivotIndex], a[right]);
     Comparable pivot = a[right];
 
     int i = left - 1, j = right;
     for (;;)
     {
-      // Adjust comparison for ascending or descending order
       if (!reverse)
       {
         while (a[++i] < pivot)
@@ -135,14 +134,13 @@ void Quicksort(std::vector<Comparable> &a, int left, int right, bool reverse = f
       std::swap(a[i], a[j]);
     }
 
-    std::swap(a[i], a[right]); // Restore pivot
+    std::swap(a[i], a[right]);
 
-    Quicksort(a, left, i - 1, reverse);  // Sort small elements
-    Quicksort(a, i + 1, right, reverse); // Sort large elements
+    Quicksort(a, left, i - 1, reverse);
+    Quicksort(a, i + 1, right, reverse);
   }
   else
   {
-    // Use insertion sort for small arrays
     InsertionSort(a, left, right, reverse);
   }
   // CODE ENDS
