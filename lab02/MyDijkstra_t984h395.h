@@ -8,6 +8,9 @@
 #include <climits>
 #include <stack>
 #include <utility>
+#include <set>
+#include <algorithm>
+#include <limits>
 
 typedef unsigned int NodeType;
 typedef unsigned int WeightType;
