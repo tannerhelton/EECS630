@@ -19,3 +19,10 @@
      amount of time, and the third line tells if your program uses a proper amount of space.
      For a completely correct run, you should see three "Yes" from the output.
    * Keep an eye on the standard output, you need to have diff program on your system.
+
+
+
+/usr/bin/time -v -o tmp_log.txt ./Lab3 Inputs/input_1.txt > result_1.txt
+python3 GradingScript.py result_1.txt Outputs/output_1.txt tmp_log.txt Logs/log_1.txt 2659.851
+
+valgrind --leak-check=full  /usr/bin/time -v -o tmp_log.txt ./Lab3 Inputs/input_1.txt > result_1.txt
