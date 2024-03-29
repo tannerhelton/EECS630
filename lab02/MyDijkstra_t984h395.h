@@ -8,9 +8,7 @@
 #include <climits>
 #include <stack>
 #include <utility>
-#include <set>
 #include <algorithm>
-#include <limits>
 
 typedef unsigned int NodeType;
 typedef unsigned int WeightType;
@@ -36,49 +34,61 @@ void ShortestPath_Dijkstra(
     std::vector<NodeType> &path)
 {
     /*------ CODE BEGINS ------*/
-    std::vector<WeightType> dist(graph.size(), std::numeric_limits<WeightType>::max());
-    std::vector<NodeType> prev(graph.size(), -1);
-    std::set<std::pair<WeightType, NodeType>> queue;
+    std::vector<WeightType> distances(graph.size(), UINT_MAX); // Distance from source to each node
+    std::vector<NodeType> previous(graph.size(), UINT_MAX);    // Previous node in the shortest path
+    std::vector<bool> visited(graph.size(), false);            // Checks if a node has been visited
 
-    dist[source] = 0;
-    queue.insert({0, source});
+    //  Initialize to zero
+    distances[source] = 0;
+    // Initalize priority queue called pq
+    std::priority_queue<std::pair<WeightType, NodeType>,
+                        std::vector<std::pair<WeightType, NodeType>>,
+                        std::greater<std::pair<WeightType, NodeType>>>
+        pq;
 
-    while (!queue.empty())
+    // Push the source node and its distance (0) into the priority queue
+    pq.push(std::make_pair(0, source));
+
+    // Dijkstra's algorithm main loop
+    while (!pq.empty())
     {
-        NodeType u = queue.begin()->second;
-        queue.erase(queue.begin());
+        NodeType u = pq.top().second; // Pop node with the smallest distance from the priority queue
+        pq.pop();
 
-        if (u == end)
-            break;
+        //  Skip if node has been visited before
+        if (visited[u])
+            continue;
+        visited[u] = true; // Mark the current node as visited
 
+        //  Neighbors of the current node
         for (const auto &neighbor : graph[u])
         {
-            NodeType v = neighbor.first;
-            WeightType weight = neighbor.second;
+            NodeType v = neighbor.first;         // Neighbor node
+            WeightType weight = neighbor.second; // Weight of the edge to the neighbor
 
-            // Check if a shorter path to v exists through u
-            if (dist[u] + weight < dist[v])
+            // Update distance if a shorter path is found
+            if (distances[u] != UINT_MAX && distances[u] + weight < distances[v])
             {
-                queue.erase({dist[v], v});
-                dist[v] = dist[u] + weight;
-                prev[v] = u;
-                queue.insert({dist[v], v});
+                distances[v] = distances[u] + weight;
+                previous[v] = u;
+                // Add the neighbor to the priority queue with the updated distance
+                pq.push(std::make_pair(distances[v], v));
             }
         }
     }
 
-    // Reconstruct the shortest path
-    path_len = dist[end];
+    // Reconstruct the path
     path.clear();
-    if (prev[end] != -1 || end == source)
-    { // Check if there is a path to end
-        for (NodeType at = end; at != -1; at = prev[at])
-        {
-            path.push_back(at);
-        }
-        std::reverse(path.begin(), path.end());
+    path_len = distances[end];
+    NodeType current = end;
+    // Reconstruct the path by backtracking from the end to the source
+    while (current != UINT_MAX)
+    {
+        path.push_back(current);
+        current = previous[current];
     }
-    /*------ CODE ENDS ------*/
+    std::reverse(path.begin(), path.end()); // Reverse the path to start from the source
+                                            /*------ CODE ENDS ------*/
 }
 
 #endif
