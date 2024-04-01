@@ -36,35 +36,26 @@ float Min(float a, float b)
     return (a < b) ? a : b;
 }
 
-float ClosestPairRecursive(
-    const std::vector<PointType> &pointsSortedX,
-    const std::vector<PointType> &pointsSortedY)
+float ClosestPairRecursive(const std::vector<PointType> &pointsSortedX, const std::vector<PointType> &pointsSortedY)
 {
-    if (pointsSortedX.size() <= 3)
+    size_t n = pointsSortedX.size();
+    if (n <= 3)
     {
         float minDist = std::numeric_limits<float>::max();
-        for (size_t i = 0; i < pointsSortedX.size(); ++i)
+        for (size_t i = 0; i < n; ++i)
         {
-            for (size_t j = i + 1; j < pointsSortedX.size(); ++j)
+            for (size_t j = i + 1; j < n; ++j)
             {
-                float dist = Distance(pointsSortedX[i], pointsSortedX[j]);
-                if (dist < minDist)
-                {
-                    minDist = dist;
-                }
+                minDist = std::min(minDist, Distance(pointsSortedX[i], pointsSortedX[j]));
             }
         }
         return minDist;
     }
 
-    size_t mid = pointsSortedX.size() / 2;
+    size_t mid = n / 2;
     PointType midPoint = pointsSortedX[mid];
 
-    std::vector<PointType> leftX(pointsSortedX.begin(), pointsSortedX.begin() + mid);
-    std::vector<PointType> rightX(pointsSortedX.begin() + mid, pointsSortedX.end());
-
-    std::vector<PointType> leftY;
-    std::vector<PointType> rightY;
+    std::vector<PointType> leftY, rightY;
     for (const auto &point : pointsSortedY)
     {
         if (point.x <= midPoint.x)
@@ -77,15 +68,16 @@ float ClosestPairRecursive(
         }
     }
 
-    float distLeft = ClosestPairRecursive(leftX, leftY);
-    float distRight = ClosestPairRecursive(rightX, rightY);
+    float distLeft = ClosestPairRecursive(std::vector<PointType>(pointsSortedX.begin(), pointsSortedX.begin() + mid), leftY);
+    float distRight = ClosestPairRecursive(std::vector<PointType>(pointsSortedX.begin() + mid, pointsSortedX.end()), rightY);
 
     float d = std::min(distLeft, distRight);
 
+    // Construct the strip
     std::vector<PointType> strip;
     for (const auto &point : pointsSortedY)
     {
-        if (std::fabs(point.x - midPoint.x) < d)
+        if (fabs(point.x - midPoint.x) < d)
         {
             strip.push_back(point);
         }

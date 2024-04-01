@@ -17,4 +17,4 @@ $(TEST_CASES): build
 # Clean up generated files
 .PHONY: clean
 clean:
-	rm -f result_*.txt Lab result_log_*.txt
+	rm -f result_*.txt Lab result_log_*.txt test_result
