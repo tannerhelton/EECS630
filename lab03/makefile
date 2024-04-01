@@ -1,8 +1,8 @@
 # Define test case numbers
 TEST_CASES := $(shell seq 1 10)
 
-# Phony target to handle all tests including Valgrind checks
-.PHONY: all valgrind
+# Phony target to handle all tests
+.PHONY: all
 all: $(TEST_CASES)
 
 build: MyClosestPairOfPoints_t984h395.h
