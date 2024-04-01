@@ -150,7 +150,6 @@ float ClosestPairOfPoints(
         return std::numeric_limits<float>::infinity();
     }
 
-    // Create a modifiable copy of the points vector
     std::vector<PointType> pointsCopy = points;
     std::sort(pointsCopy.begin(), pointsCopy.end(), compareX);
 
