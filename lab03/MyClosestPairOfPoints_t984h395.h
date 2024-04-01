@@ -28,23 +28,18 @@ typedef struct
 // Helper functions
 float Distance(const PointType &a, const PointType &b)
 {
-    return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+    return std::hypot(a.x - b.x, a.y - b.y);
 }
 
-float Min(float a, float b)
+float ClosestPairRecursive(const std::vector<PointType> &pointsSortedX, std::vector<PointType> &pointsSortedY, size_t start, size_t end)
 {
-    return (a < b) ? a : b;
-}
-
-float ClosestPairRecursive(const std::vector<PointType> &pointsSortedX, const std::vector<PointType> &pointsSortedY)
-{
-    size_t n = pointsSortedX.size();
+    size_t n = end - start;
     if (n <= 3)
     {
         float minDist = std::numeric_limits<float>::max();
-        for (size_t i = 0; i < n; ++i)
+        for (size_t i = start; i < end; ++i)
         {
-            for (size_t j = i + 1; j < n; ++j)
+            for (size_t j = i + 1; j < end; ++j)
             {
                 minDist = std::min(minDist, Distance(pointsSortedX[i], pointsSortedX[j]));
             }
@@ -52,32 +47,18 @@ float ClosestPairRecursive(const std::vector<PointType> &pointsSortedX, const st
         return minDist;
     }
 
-    size_t mid = n / 2;
+    size_t mid = start + n / 2;
     PointType midPoint = pointsSortedX[mid];
 
-    std::vector<PointType> leftY, rightY;
-    for (const auto &point : pointsSortedY)
-    {
-        if (point.x <= midPoint.x)
-        {
-            leftY.push_back(point);
-        }
-        else
-        {
-            rightY.push_back(point);
-        }
-    }
-
-    float distLeft = ClosestPairRecursive(std::vector<PointType>(pointsSortedX.begin(), pointsSortedX.begin() + mid), leftY);
-    float distRight = ClosestPairRecursive(std::vector<PointType>(pointsSortedX.begin() + mid, pointsSortedX.end()), rightY);
+    float distLeft = ClosestPairRecursive(pointsSortedX, pointsSortedY, start, mid);
+    float distRight = ClosestPairRecursive(pointsSortedX, pointsSortedY, mid, end);
 
     float d = std::min(distLeft, distRight);
 
-    // Construct the strip
     std::vector<PointType> strip;
     for (const auto &point : pointsSortedY)
     {
-        if (fabs(point.x - midPoint.x) < d)
+        if (std::abs(point.x - midPoint.x) < d)
         {
             strip.push_back(point);
         }
@@ -105,15 +86,15 @@ float ClosestPairOfPoints(
         return 0.0f;
     }
 
-    std::vector<PointType> pointsSortedX = points;
-    std::vector<PointType> pointsSortedY = points;
+    std::vector<PointType> pointsSortedX = points, pointsSortedY = points;
     std::sort(pointsSortedX.begin(), pointsSortedX.end(), [](const PointType &a, const PointType &b)
               { return a.x < b.x; });
     std::sort(pointsSortedY.begin(), pointsSortedY.end(), [](const PointType &a, const PointType &b)
               { return a.y < b.y; });
 
-    float minDist = ClosestPairRecursive(pointsSortedX, pointsSortedY);
+    float minDist = ClosestPairRecursive(pointsSortedX, pointsSortedY, 0, points.size());
 
+    // Avoid recalculating the distance by storing them
     for (size_t i = 0; i < points.size(); ++i)
     {
         for (size_t j = i + 1; j < points.size(); ++j)
@@ -121,16 +102,8 @@ float ClosestPairOfPoints(
             float dist = Distance(points[i], points[j]);
             if (dist == minDist)
             {
-                if (points[i].ID < points[j].ID)
-                {
-                    p1 = points[i];
-                    p2 = points[j];
-                }
-                else
-                {
-                    p1 = points[j];
-                    p2 = points[i];
-                }
+                p1 = points[i].ID < points[j].ID ? points[i] : points[j];
+                p2 = points[i].ID < points[j].ID ? points[j] : points[i];
                 break;
             }
         }
