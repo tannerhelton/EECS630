@@ -1,13 +1,12 @@
-#ifndef _MY_CLOSEST_PAIR_POINTS_H_
-#define _MY_CLOSEST_PAIR_POINTS_H_
-
 #include <iostream>
 #include <iomanip>
 #include <vector>
 #include <cmath>
 #include <limits>
 #include <algorithm>
-#include <fstream>
+
+#ifndef _MY_CLOSEST_PAIR_POINTS_H_
+#define _MY_CLOSEST_PAIR_POINTS_H_
 
 typedef struct
 {
@@ -16,17 +15,6 @@ typedef struct
     float y;         // the y-coordinate of the point
 } PointType;
 
-/*------------------------------------------------------------------------------
-    ClosestPairOfPoints: find the closest pair of points from a set of points in a 2D plane
-
-        points: the set of points
-        p1: the first point of the closest pair of points; should have a smaller ID
-        p2: the second point of the closest pair of points; should have a larger ID
-
-        returns the distance between the two points (round to 3-digit precision)
-------------------------------------------------------------------------------*/
-
-// Helper functions
 bool compareX(const PointType &a, const PointType &b)
 {
     return a.x < b.x;
@@ -63,7 +51,9 @@ float bruteForce(const std::vector<PointType> &points, int left, int right, Poin
 
 float stripClosest(std::vector<PointType> &strip, float d, PointType &p1, PointType &p2)
 {
-    float minDistance = d;
+    float minDistance = d; // Initialize the minimum distance as d
+
+    // Sort the points according to y-coordinate
     std::sort(strip.begin(), strip.end(), compareY);
 
     for (size_t i = 0; i < strip.size(); ++i)
@@ -85,17 +75,21 @@ float stripClosest(std::vector<PointType> &strip, float d, PointType &p1, PointT
 
 float closestUtil(std::vector<PointType> &points, int left, int right, PointType &p1, PointType &p2)
 {
+    // If there are 2 or 3 points, then use brute force
     if (right - left <= 2)
     {
         return bruteForce(points, left, right, p1, p2);
     }
 
+    // Find the middle point
     int mid = left + (right - left) / 2;
     PointType midPoint = points[mid];
 
     PointType pl1, pl2, pr1, pr2;
     float dl = closestUtil(points, left, mid, pl1, pl2);
     float dr = closestUtil(points, mid + 1, right, pr1, pr2);
+
+    // Update the closest pair from the left and right halves
     if (dl < dr)
     {
         p1 = pl1;
@@ -107,12 +101,16 @@ float closestUtil(std::vector<PointType> &points, int left, int right, PointType
         p2 = pr2;
     }
 
+    // Ensure that p1 has the smaller ID
     if (p1.ID > p2.ID)
     {
         std::swap(p1, p2);
     }
 
     float d = std::min(dl, dr);
+
+    // Build an array strip[] that contains points close (closer than d)
+    // to the line passing through the middle point
     std::vector<PointType> strip;
     for (int i = left; i <= right; i++)
     {
@@ -121,15 +119,19 @@ float closestUtil(std::vector<PointType> &points, int left, int right, PointType
             strip.push_back(points[i]);
         }
     }
+
+    // Find the closest points in strip
     PointType strip_p1, strip_p2;
     float strip_d = stripClosest(strip, d, strip_p1, strip_p2);
 
+    // Check if the closest pair is in the strip
     if (strip_d < d)
     {
         p1 = strip_p1;
         p2 = strip_p2;
     }
 
+    // Ensure that p1 has the smaller ID
     if (p1.ID > p2.ID)
     {
         std::swap(p1, p2);
@@ -138,27 +140,24 @@ float closestUtil(std::vector<PointType> &points, int left, int right, PointType
     return std::min(d, strip_d);
 }
 
-float ClosestPairOfPoints(
-    const std::vector<PointType> &points,
-    PointType &p1,
-    PointType &p2)
+float ClosestPairOfPoints(std::vector<PointType> &points, PointType &p1, PointType &p2)
 {
-    /*------ CODE BEGINS ------*/
+    // Check if there are at least two points
     if (points.size() < 2)
     {
         std::cerr << "Error: At least two points are required.\n";
         return std::numeric_limits<float>::infinity();
     }
 
-    // Create a modifiable copy of the points vector
-    std::vector<PointType> pointsCopy = points;
-    std::sort(pointsCopy.begin(), pointsCopy.end(), compareX);
+    // Sort the points by X-coordinate
+    std::sort(points.begin(), points.end(), compareX);
 
-    float minDistance = closestUtil(pointsCopy, 0, pointsCopy.size() - 1, p1, p2);
+    // Use recursive function closestUtil() to find the smallest distance
+    float minDistance = closestUtil(points, 0, points.size() - 1, p1, p2);
+
+    // Round the distance to 3 digits
     minDistance = std::round(minDistance * 1000.0) / 1000.0;
-
     return minDistance;
-    /*------ CODE ENDS ------*/
 }
 
-#endif
+#endif // _MY_CLOSEST_PAIR_POINTS_H_
