@@ -2,8 +2,8 @@
 #define _MY_EDIT_DISTANCE_H_
 
 #include <iostream>
-#include <string>
 #include <vector>
+#include <string>
 #include <algorithm>
 
 /*------------------------------------------------------------------------------
@@ -21,69 +21,71 @@ unsigned int EditDistance(
     const std::string &str2, std::string &operations)
 {
     /*------ CODE BEGINS ------*/
-    int len1 = str1.size();
-    int len2 = str2.size();
-    std::vector<std::vector<int>> dp(len1 + 1, std::vector<int>(len2 + 1));
+    size_t len1 = str1.length();
+    size_t len2 = str2.length();
+    std::vector<std::vector<int>> dp(2, std::vector<int>(len2 + 1));
 
-    // Initialize the matrix
-    for (int i = 0; i <= len1; i++)
+    // Initialize the first row of the DP table for insertions
+    for (size_t j = 0; j <= len2; ++j)
     {
-        for (int j = 0; j <= len2; j++)
+        dp[0][j] = j;
+    }
+
+    // Fill the DP table using only two rows
+    for (size_t i = 1; i <= len1; ++i)
+    {
+        dp[i % 2][0] = i; // Deletions from str1 to match empty str2 prefix
+        for (size_t j = 1; j <= len2; ++j)
         {
-            if (i == 0)
-                dp[i][j] = j; // Cost of insertions
-            else if (j == 0)
-                dp[i][j] = i; // Cost of deletions
-            else
-            {
-                int match = dp[i - 1][j - 1] + (str1[i - 1] == str2[j - 1] ? 0 : 1);
-                int insert = dp[i][j - 1] + 1;
-                int deleteOp = dp[i - 1][j] + 1;
-                dp[i][j] = std::min({match, insert, deleteOp});
-            }
+            int cost = (str1[i - 1] == str2[j - 1]) ? 0 : 1;
+            dp[i % 2][j] = std::min({
+                dp[(i - 1) % 2][j - 1] + cost, // Replace or match
+                dp[(i - 1) % 2][j] + 1,        // Delete from str1
+                dp[i % 2][j - 1] + 1           // Insert into str1
+            });
         }
     }
 
-    // Traceback to find the operations
-    operations.clear();
-    int i = len1, j = len2;
-    while (i > 0 || j > 0)
+    // Reconstruct operations from the DP table
+    operations = "";
+    size_t i = len1, j = len2;
+    while (i > 0 && j > 0)
     {
-        if (i > 0 && j > 0)
+        if (str1[i - 1] == str2[j - 1] && dp[i % 2][j] == dp[(i - 1) % 2][j - 1])
         {
-            if (dp[i][j] == dp[i - 1][j - 1] + (str1[i - 1] != str2[j - 1]))
-            {
-                // Prefer match/mismatch first
-                operations = (str1[i - 1] == str2[j - 1] ? 'M' : 'C') + operations;
-                i--;
-                j--;
-            }
-            else if (dp[i][j] == dp[i][j - 1] + 1)
-            {
-                // Then consider insertion
-                operations = 'I' + operations;
-                j--;
-            }
-            else
-            {
-                // Finally consider deletion
-                operations = 'D' + operations;
-                i--;
-            }
+            operations = 'M' + operations; // Match
+            i--;
+            j--;
         }
-        else if (i > 0)
+        else if (dp[i % 2][j] == dp[(i - 1) % 2][j] + 1)
         {
-            operations = 'D' + operations;
+            operations = 'D' + operations; // Delete
             i--;
         }
-        else if (j > 0)
+        else if (dp[i % 2][j] == dp[i % 2][j - 1] + 1)
         {
-            operations = 'I' + operations;
+            operations = 'I' + operations; // Insert
+            j--;
+        }
+        else
+        {
+            operations = 'C' + operations; // Substitute
+            i--;
             j--;
         }
     }
+    while (i > 0)
+    {
+        operations = 'D' + operations;
+        i--;
+    } // Clean up remaining deletions
+    while (j > 0)
+    {
+        operations = 'I' + operations;
+        j--;
+    } // Clean up remaining insertions
 
-    return dp[len1][len2];
+    return dp[len1 % 2][len2];
     /*------ CODE ENDS ------*/
 }
 
@@ -119,44 +121,45 @@ void PrintAlignment(
     const std::string &str2,
     const std::string &operations)
 {
-    std::string aligned1, aligned2, alignedOps;
-    int i = 0, j = 0;
+    std::string align1, align2, alignOps;
+    size_t index1 = 0, index2 = 0;
+
     for (char op : operations)
     {
         switch (op)
         {
         case 'M':
-            aligned1 += str1[i];
-            aligned2 += str2[j];
-            alignedOps += '|';
-            i++;
-            j++;
+            align1 += str1[index1];
+            align2 += str2[index2];
+            alignOps += '|';
+            index1++;
+            index2++;
             break;
         case 'C':
-            aligned1 += str1[i];
-            aligned2 += str2[j];
-            alignedOps += '*';
-            i++;
-            j++;
+            align1 += str1[index1];
+            align2 += str2[index2];
+            alignOps += '*';
+            index1++;
+            index2++;
             break;
         case 'I':
-            aligned1 += '-';
-            aligned2 += str2[j];
-            alignedOps += ' ';
-            j++;
+            align1 += '-';
+            align2 += str2[index2];
+            alignOps += ' ';
+            index2++;
             break;
         case 'D':
-            aligned1 += str1[i];
-            aligned2 += '-';
-            alignedOps += ' ';
-            i++;
+            align1 += str1[index1];
+            align2 += '-';
+            alignOps += ' ';
+            index1++;
             break;
         }
     }
 
-    std::cout << aligned1 << std::endl;
-    std::cout << alignedOps << std::endl;
-    std::cout << aligned2 << std::endl;
+    std::cout << align1 << std::endl;
+    std::cout << alignOps << std::endl;
+    std::cout << align2 << std::endl;
 }
 
 #endif

@@ -18,3 +18,4 @@ $(TEST_CASES): clean build
 .PHONY: clean
 clean:
 	rm -f result_*.txt Lab result_log_*.txt test_result
+	clear
