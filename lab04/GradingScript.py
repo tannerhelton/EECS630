@@ -29,22 +29,25 @@ if __name__ == '__main__':
     os.system(cmd)
     messagas = ["","",""]
     if os.path.exists(res_file) and os.stat(res_file).st_size == 0:
-        messagas[0] = "Yes"
+        messagas[0] += "Yes"
     else:
-        messagas[0] = "No"
+        messagas[0] += "No"
+    messagas[0] += " :: Expected Output?"
 
     default_time, default_space = searchLog(f4)
     user_time, user_sapce = searchLog(f3)
     scaled_user_time = user_time * user_freq / default_freq
 
     if scaled_user_time <= time_factor*default_time:
-        messagas[1] = "Yes"
+        messagas[1] += "Yes"
     else:
-        messagas[1] = "No"
+        messagas[1] += "No"
+    messagas[1] += " :: Expected Time?"
 
     if user_sapce <= space_factor*default_space:
-        messagas[2] = "Yes"
+        messagas[2] += "Yes"
     else:
-        messagas[2] = "No"
+        messagas[2] += "No"
+    messagas[2] += " :: Expected Memory?"
 
     print("\n".join(messagas))

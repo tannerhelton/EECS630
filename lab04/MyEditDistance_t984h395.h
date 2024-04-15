@@ -21,71 +21,65 @@ unsigned int EditDistance(
     const std::string &str2, std::string &operations)
 {
     /*------ CODE BEGINS ------*/
-    size_t len1 = str1.length();
-    size_t len2 = str2.length();
-    std::vector<std::vector<int>> dp(2, std::vector<int>(len2 + 1));
+    size_t len1 = str1.length(), len2 = str2.length();
+    std::vector<std::vector<int>> dp(len1 + 1, std::vector<int>(len2 + 1));
 
-    // Initialize the first row of the DP table for insertions
+    // Initialize DP table
+    for (size_t i = 0; i <= len1; ++i)
+        dp[i][0] = i;
     for (size_t j = 0; j <= len2; ++j)
-    {
         dp[0][j] = j;
-    }
 
-    // Fill the DP table using only two rows
+    // Fill DP table
     for (size_t i = 1; i <= len1; ++i)
     {
-        dp[i % 2][0] = i; // Deletions from str1 to match empty str2 prefix
         for (size_t j = 1; j <= len2; ++j)
         {
             int cost = (str1[i - 1] == str2[j - 1]) ? 0 : 1;
-            dp[i % 2][j] = std::min({
-                dp[(i - 1) % 2][j - 1] + cost, // Replace or match
-                dp[(i - 1) % 2][j] + 1,        // Delete from str1
-                dp[i % 2][j - 1] + 1           // Insert into str1
-            });
+            dp[i][j] = std::min({dp[i - 1][j - 1] + cost, dp[i][j - 1] + 1, dp[i - 1][j] + 1});
         }
     }
 
-    // Reconstruct operations from the DP table
-    operations = "";
+    // Trace back to find the operations
     size_t i = len1, j = len2;
+    operations.clear();
     while (i > 0 && j > 0)
     {
-        if (str1[i - 1] == str2[j - 1] && dp[i % 2][j] == dp[(i - 1) % 2][j - 1])
+        if (dp[i][j] == dp[i - 1][j - 1] && str1[i - 1] == str2[j - 1])
         {
-            operations = 'M' + operations; // Match
+            operations = 'M' + operations;
             i--;
             j--;
         }
-        else if (dp[i % 2][j] == dp[(i - 1) % 2][j] + 1)
+        else if (dp[i][j] == dp[i - 1][j - 1] + 1)
         {
-            operations = 'D' + operations; // Delete
+            operations = 'S' + operations;
             i--;
+            j--;
         }
-        else if (dp[i % 2][j] == dp[i % 2][j - 1] + 1)
+        else if (dp[i][j] == dp[i][j - 1] + 1)
         {
-            operations = 'I' + operations; // Insert
+            operations = 'I' + operations;
             j--;
         }
         else
         {
-            operations = 'C' + operations; // Substitute
+            operations = 'D' + operations;
             i--;
-            j--;
         }
     }
     while (i > 0)
     {
         operations = 'D' + operations;
         i--;
-    } // Clean up remaining deletions
+    }
     while (j > 0)
     {
         operations = 'I' + operations;
         j--;
-    } // Clean up remaining insertions
+    }
 
-    return dp[len1 % 2][len2];
+    return dp[len1][len2];
     /*------ CODE ENDS ------*/
 }
 
@@ -122,39 +116,41 @@ void PrintAlignment(
     const std::string &operations)
 {
     std::string align1, align2, alignOps;
-    size_t index1 = 0, index2 = 0;
+    size_t i = 0, j = 0, opIndex = 0;
 
-    for (char op : operations)
+    while (opIndex < operations.size())
     {
-        switch (op)
+        if (operations[opIndex] == 'M')
         {
-        case 'M':
-            align1 += str1[index1];
-            align2 += str2[index2];
+            align1 += str1[i];
+            align2 += str2[j];
             alignOps += '|';
-            index1++;
-            index2++;
-            break;
-        case 'C':
-            align1 += str1[index1];
-            align2 += str2[index2];
+            i++;
+            j++;
+        }
+        else if (operations[opIndex] == 'S')
+        {
+            align1 += str1[i];
+            align2 += str2[j];
             alignOps += '*';
-            index1++;
-            index2++;
-            break;
-        case 'I':
+            i++;
+            j++;
+        }
+        else if (operations[opIndex] == 'I')
+        {
             align1 += '-';
-            align2 += str2[index2];
+            align2 += str2[j];
             alignOps += ' ';
-            index2++;
-            break;
-        case 'D':
-            align1 += str1[index1];
+            j++;
+        }
+        else
+        { // 'D'
+            align1 += str1[i];
             align2 += '-';
             alignOps += ' ';
-            index1++;
-            break;
+            i++;
         }
+        opIndex++;
     }
 
     std::cout << align1 << std::endl;

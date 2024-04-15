@@ -12,7 +12,15 @@ build: MyEditDistance_t984h395.h
 $(TEST_CASES): clean build
 	@echo "Running Test Case $@"
 	- /usr/bin/time -v -o result_log_$@.txt ./Lab Inputs/input_$@.txt > result_$@.txt
-	- python3 GradingScript.py result_$@.txt Outputs/output_$@.txt result_log_$@.txt Logs/log_$@.txt 2659.851
+	- python3 GradingScript.py result_$@.txt Outputs/output_$@.txt result_log_$@.txt Logs/log_$@.txt 2955.158
+
+print: result_1.txt
+	@echo "Test Case 1 Input:"
+	@cat Inputs/input_1.txt
+	@echo "\n\nTest Case 1 Output:"
+	@cat result_1.txt
+	@echo "\n\nTest Case 1 Expected Output:"
+	@cat Outputs/output_1.txt
 
 # Clean up generated files
 .PHONY: clean
