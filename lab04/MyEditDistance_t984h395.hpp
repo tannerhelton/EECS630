@@ -24,7 +24,6 @@ unsigned int EditDistance(
     size_t len1 = str1.length(), len2 = str2.length();
     std::vector<std::vector<int>> dp(len1 + 1, std::vector<int>(len2 + 1));
 
-    // init dp table
     for (size_t i = 0; i <= len1; ++i)
         dp[i][0] = i;
     for (size_t j = 0; j <= len2; ++j)
@@ -39,7 +38,6 @@ unsigned int EditDistance(
         }
     }
 
-    // traceback
     size_t i = len1, j = len2;
     operations.clear();
     while (i > 0 && j > 0)
