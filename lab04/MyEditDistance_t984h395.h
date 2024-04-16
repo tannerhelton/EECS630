@@ -24,13 +24,12 @@ unsigned int EditDistance(
     size_t len1 = str1.length(), len2 = str2.length();
     std::vector<std::vector<int>> dp(len1 + 1, std::vector<int>(len2 + 1));
 
-    // Initialize DP table
+    // init dp table
     for (size_t i = 0; i <= len1; ++i)
         dp[i][0] = i;
     for (size_t j = 0; j <= len2; ++j)
         dp[0][j] = j;
 
-    // Fill DP table
     for (size_t i = 1; i <= len1; ++i)
     {
         for (size_t j = 1; j <= len2; ++j)
@@ -40,32 +39,32 @@ unsigned int EditDistance(
         }
     }
 
-    // Trace back to find the operations
+    // traceback
     size_t i = len1, j = len2;
     operations.clear();
     while (i > 0 && j > 0)
     {
-        if (dp[i][j] == dp[i - 1][j - 1] && str1[i - 1] == str2[j - 1])
+        if (dp[i][j] == dp[i - 1][j] + 1)
         {
-            operations = 'M' + operations;
+            operations = 'D' + operations;
             i--;
-            j--;
-        }
-        else if (dp[i][j] == dp[i - 1][j - 1] + 1)
-        {
-            operations = 'S' + operations;
-            i--;
-            j--;
         }
         else if (dp[i][j] == dp[i][j - 1] + 1)
         {
             operations = 'I' + operations;
             j--;
         }
+        else if (dp[i][j] == dp[i - 1][j - 1] + 1)
+        {
+            operations = 'C' + operations;
+            i--;
+            j--;
+        }
         else
         {
-            operations = 'D' + operations;
+            operations = 'M' + operations;
             i--;
+            j--;
         }
     }
     while (i > 0)
@@ -128,7 +127,7 @@ void PrintAlignment(
             i++;
             j++;
         }
-        else if (operations[opIndex] == 'S')
+        else if (operations[opIndex] == 'C')
         {
             align1 += str1[i];
             align2 += str2[j];
@@ -144,7 +143,7 @@ void PrintAlignment(
             j++;
         }
         else
-        { // 'D'
+        {
             align1 += str1[i];
             align2 += '-';
             alignOps += ' ';

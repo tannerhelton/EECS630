@@ -5,7 +5,7 @@ TEST_CASES := $(shell seq 1 10)
 .PHONY: all
 all: $(TEST_CASES)
 
-build: MyEditDistance_t984h395.h
+build: MyEditDistance_t984h395.hpp
 	g++ -std=c++11 MainTest.cpp -o Lab
 
 # Rule to run each test case

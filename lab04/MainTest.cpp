@@ -1,4 +1,4 @@
-#include "MyEditDistance_t984h395.h"
+#include "MyEditDistance_t984h395.hpp"
 #include <fstream>
 void ReadInput(const char *fname, std::string &str1, std::string &str2)
 {
